@@ -55,9 +55,35 @@ export default function Home() {
     setEstimateItems(prev => prev.filter(item => item.id !== itemId));
   };
 
-  const handleExportEstimate = () => {
-    console.log('Exporting estimate...', estimateItems);
-    // In real app, this would generate and download a PDF or send to backend
+  const handleExportEstimate = async () => {
+    try {
+      // Import the PDF generation function dynamically to avoid SSR issues
+      const { generateEstimatePdf } = await import('@/lib/pdfExport');
+      
+      // Get a reference to the estimate summary element
+      const element = document.getElementById('estimate-summary');
+      
+      if (!element) {
+        console.error('Could not find estimate summary element');
+        return;
+      }
+      
+      // Generate and download the PDF
+      const success = await generateEstimatePdf(
+        element,
+        estimateItems,
+        selectedCurrency,
+        currencyRates[selectedCurrency]
+      );
+      
+      if (success) {
+        console.log('PDF generated successfully');
+      } else {
+        console.error('Failed to generate PDF');
+      }
+    } catch (error) {
+      console.error('Error exporting estimate:', error);
+    }
   };
 
   return (

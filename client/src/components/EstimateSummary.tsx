@@ -56,7 +56,7 @@ export default function EstimateSummary({
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full" id="estimate-summary">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div className="flex items-center space-x-2">
           <Calculator className="h-5 w-5 text-primary" />
