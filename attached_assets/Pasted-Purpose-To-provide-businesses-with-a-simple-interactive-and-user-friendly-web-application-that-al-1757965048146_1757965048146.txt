@@ -1,0 +1,51 @@
+Purpose: To provide businesses with a simple, interactive, and user-friendly web application that allows them to browse, configure, and estimate costs for different IT service offerings with currency conversion support.
+
+Core Features:
+Service Catalog Display-
+Present a catalog of IT services categorized by type (Development, Marketing, IT Services, Analytics, Design).
+Include a searchable list with filters by service category and keyword-based search.
+Each service item displays brief info: name, category, base cost, and short description.
+
+Service Configuration Modal-
+On clicking a service, open a modal popup showing detailed descriptions, key features, scale options (Small, Medium, Large), and available add-ons.
+Allow users to select scale and add-ons to tailor the service.
+Display real-time cost preview reflecting base cost, add-ons, and monthly maintenance.
+
+Selection & Estimation Summary-
+Allow users to add configured services to an estimate list.
+Show a running total of selected services, with detailed cost breakdown.
+Present the number of selected services dynamically.
+Support modifying or removing selected services.
+
+Multi-Currency Support
+Provide currency selection dropdown (USD, EUR, INR, GBP).
+Automatically convert prices and totals into the selected currency using up-to-date conversion rates.
+
+Responsive Design
+Layout adjusts gracefully across various devices—desktop, tablets, and mobiles.
+Clean, professional visual style guided by a consistent CSS design system.
+
+Basic Settings
+Simple options like project timeline that can affect pricing multipliers.
+Display informational notes or warnings about pricing variances.
+
+
+Technical Specifications:
+
+Frontend: HTML5, CSS3 (with CSS variables and design tokens), and vanilla JavaScript for interactivity.
+Data Model: Static JSON(Attached here that will serve as static database) containing all service details, features, pricing scales, add-ons, and currency rates.
+Structure:
+Header with app title and currency selector.
+Main content area with two panels:
+	Left: Filtered service catalog with search and category filters.
+	Right: Estimation summary with selected services and cost breakdown.
+Modal dialog for detailed service configurations.
+Performance: Fast client-side operations with efficient filtering and dynamic updates.
+Accessibility: Keyboard navigable with focus styles and proper ARIA attributes where applicable.
+
+Exclusions from MVP:
+Backend or database connectivity (static data for MVP).
+User authentication or saving estimates.
+Complex analytics or usage tracking.
+Multi-language support (limit to English).
+Dark mode or System theme.
