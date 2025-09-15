@@ -1,20 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Server, Code, BarChart3, Palette, Settings } from "lucide-react";
-import type { ITService } from "@shared/schema";
+import { Server, Code, BarChart3, Palette, Settings, Monitor, Globe } from "lucide-react";
+import type { ITService, Currency } from "@shared/schema";
 
 interface ServiceCardProps {
   service: ITService;
   onConfigure: (service: ITService) => void;
+  selectedCurrency: Currency;
+  currencyRate: number;
 }
 
 const getCategoryIcon = (category: string) => {
   switch (category.toLowerCase()) {
-    case "erp":
-      return <Server className="h-5 w-5" />;
     case "development":
       return <Code className="h-5 w-5" />;
+    case "marketing":
+      return <Globe className="h-5 w-5" />;
+    case "it services":
+      return <Server className="h-5 w-5" />;
     case "analytics":
       return <BarChart3 className="h-5 w-5" />;
     case "design":
@@ -24,20 +28,24 @@ const getCategoryIcon = (category: string) => {
   }
 };
 
-const getDeliveryModelColor = (model: string) => {
-  switch (model) {
-    case "Offshore":
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-    case "Onshore":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
-    case "Hybrid":
-      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
-    default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
-  }
+const formatCurrency = (amount: number, currency: Currency, rate: number): string => {
+  const convertedAmount = amount * rate;
+  const symbols = { USD: '$', EUR: '€', GBP: '£', INR: '₹' };
+  return `${symbols[currency]}${convertedAmount.toLocaleString(undefined, { 
+    minimumFractionDigits: 0, 
+    maximumFractionDigits: 0 
+  })}`;
 };
 
-export default function ServiceCard({ service, onConfigure }: ServiceCardProps) {
+const getCostRange = (service: ITService, currency: Currency, rate: number): string => {
+  const baseCost = service.baseCostUSD;
+  const smallCost = baseCost * service.scaleMultipliers.Small;
+  const largeCost = baseCost * service.scaleMultipliers.Large;
+  
+  return `${formatCurrency(smallCost, currency, rate)} - ${formatCurrency(largeCost, currency, rate)}`;
+};
+
+export default function ServiceCard({ service, onConfigure, selectedCurrency, currencyRate }: ServiceCardProps) {
   const handleConfigure = () => {
     console.log('Configure service triggered:', service.id);
     onConfigure(service);
@@ -49,54 +57,50 @@ export default function ServiceCard({ service, onConfigure }: ServiceCardProps) 
         <div className="flex items-start justify-between space-x-2">
           <div className="flex items-center space-x-3">
             <div className="p-2 rounded-lg bg-primary/10">
-              {getCategoryIcon(service.ServiceCategory)}
+              {getCategoryIcon(service.category)}
             </div>
             <div>
               <CardTitle className="text-lg leading-6" data-testid={`text-service-title-${service.id}`}>
-                {service.SubService}
+                {service.name}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                {service.ServiceCategory}
+                {service.category}
               </p>
             </div>
           </div>
-          <Badge variant="secondary" className={getDeliveryModelColor(service.DeliveryModel)}>
-            {service.DeliveryModel}
-          </Badge>
         </div>
       </CardHeader>
       
       <CardContent className="space-y-4">
         <div>
           <p className="text-sm text-muted-foreground line-clamp-2">
-            {service.ServiceDescription !== "Detailed description coming soon." 
-              ? service.ServiceDescription 
-              : `${service.ServiceCategory} solution for ${service.IndustryUseCase} industry with ${service.ProjectSize.toLowerCase()} scale implementation.`
-            }
+            {service.description}
           </p>
         </div>
         
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Estimated Cost</p>
+            <p className="text-sm text-muted-foreground">Price Range</p>
             <p className="text-lg font-semibold text-foreground" data-testid={`text-cost-${service.id}`}>
-              {service.Pricing.TotalEstimatedCostUSD}
+              {getCostRange(service, selectedCurrency, currencyRate)}
             </p>
           </div>
-          <Badge variant="outline">{service.ProjectSize}</Badge>
         </div>
         
-        <div className="flex flex-wrap gap-1">
-          {service.TechnologyStack.slice(0, 3).map((tech, index) => (
-            <Badge key={index} variant="secondary" className="text-xs">
-              {tech}
-            </Badge>
-          ))}
-          {service.TechnologyStack.length > 3 && (
-            <Badge variant="secondary" className="text-xs">
-              +{service.TechnologyStack.length - 3} more
-            </Badge>
-          )}
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Key Features:</p>
+          <div className="flex flex-wrap gap-1">
+            {service.keyFeatures.slice(0, 3).map((feature, index) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                {feature}
+              </Badge>
+            ))}
+            {service.keyFeatures.length > 3 && (
+              <Badge variant="secondary" className="text-xs">
+                +{service.keyFeatures.length - 3} more
+              </Badge>
+            )}
+          </div>
         </div>
         
         <Button 

@@ -1,3 +1,4 @@
+import React from 'react';
 import EstimateSummary from '../EstimateSummary';
 import { useState } from 'react';
 import type { EstimateItem, Currency } from '@shared/schema';
@@ -7,54 +8,67 @@ export default function EstimateSummaryExample() {
     {
       id: "est1",
       service: {
-        id: "ITSC_00001",
-        ServiceCategory: "ERP",
-        SubService: "Core ERP Implementation",
-        IndustryUseCase: "Retail",
-        ProjectSize: "Small",
-        DeliveryModel: "Offshore",
-        Pricing: {
-          PricingType: "Fixed Quotation",
-          TotalEstimatedCostUSD: "$15,000 - $35,000",
-          MilestoneBased: []
+        id: 1,
+        name: "Web Development",
+        category: "Development",
+        baseCostUSD: 5000,
+        description: "Complete website development from concept to launch",
+        detailedDescription: "Our web development service provides end-to-end website creation tailored to your business needs.",
+        keyFeatures: [
+          "Responsive design for all devices",
+          "Content Management System (CMS)",
+          "SEO-optimized structure and content",
+          "Cross-browser compatibility"
+        ],
+        scaleDetails: {
+          Small: "Basic 5-10 page website with standard features",
+          Medium: "Enhanced 15-25 page website with advanced functionality",
+          Large: "Enterprise-level website with complex integrations"
         },
-        ToolingLicensingInfra: {},
-        ComplianceCostsUSD: {},
-        TechnologyStack: ["Odoo", "PostgreSQL"],
-        RegionsServed: ["US", "UK"],
-        ScopeInclusions: [],
-        ScopeExclusions: [],
-        ServiceDescription: "ERP implementation for retail",
-        KeyFeatures: [],
-        AddOns: [],
-        Notes: "",
-        TimelineWeeks: "8-12",
-        EngagementModel: "Project-based",
-        PaymentTerms: "40% upfront",
-        RiskFactors: []
+        scaleMultipliers: {
+          Small: 1.0,
+          Medium: 1.5,
+          Large: 2.5
+        },
+        addOns: [
+          {
+            name: "SEO Optimization",
+            costUSD: 500,
+            description: "Advanced search engine optimization"
+          }
+        ],
+        monthlyMaintenance: {
+          Small: 100,
+          Medium: 200,
+          Large: 400
+        }
       },
       configuration: {
-        serviceId: "ITSC_00001",
+        serviceId: 1,
         projectSize: "Small",
-        deliveryModel: "Offshore",
         selectedAddOns: [],
         customizations: {}
       },
-      estimatedCost: 15000
+      estimatedCost: 5000
     }
   ]);
 
-  const handleRemoveItem = (itemId: string) => {
-    setEstimateItems(items => items.filter(item => item.id !== itemId));
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>('USD');
+
+  const currencyRates = {
+    USD: 1,
+    EUR: 0.85,
+    GBP: 0.73,
+    INR: 83.12
   };
 
   return (
     <div className="max-w-md">
       <EstimateSummary
         estimateItems={estimateItems}
-        selectedCurrency="USD"
-        currencyRate={1}
-        onRemoveItem={handleRemoveItem}
+        selectedCurrency={selectedCurrency}
+        currencyRate={currencyRates[selectedCurrency]}
+        onRemoveItem={(id) => setEstimateItems(prev => prev.filter(item => item.id !== id))}
         onExportEstimate={() => console.log('Export estimate')}
       />
     </div>

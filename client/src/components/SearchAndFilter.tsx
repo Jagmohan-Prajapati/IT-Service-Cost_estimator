@@ -10,34 +10,22 @@ interface SearchAndFilterProps {
   onSearchChange: (query: string) => void;
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
-  selectedSize: string;
-  onSizeChange: (size: string) => void;
-  selectedDeliveryModel: string;
-  onDeliveryModelChange: (model: string) => void;
   onClearFilters: () => void;
 }
 
-const categories = ["All", "ERP", "Development", "Analytics", "Design", "Marketing"];
-const projectSizes = ["All", "Small", "Medium", "Large"];
-const deliveryModels = ["All", "Offshore", "Onshore", "Hybrid"];
+const categories = ["All", "Development", "Marketing", "IT Services", "Analytics", "Design"];
 
 export default function SearchAndFilter({
   searchQuery,
   onSearchChange,
   selectedCategory,
   onCategoryChange,
-  selectedSize,
-  onSizeChange,
-  selectedDeliveryModel,
-  onDeliveryModelChange,
   onClearFilters
 }: SearchAndFilterProps) {
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
 
   const activeFiltersCount = [
-    selectedCategory !== "All",
-    selectedSize !== "All", 
-    selectedDeliveryModel !== "All"
+    selectedCategory !== "All"
   ].filter(Boolean).length;
 
   const handleClearFilters = () => {
@@ -93,7 +81,7 @@ export default function SearchAndFilter({
 
       {/* Filter Options */}
       {isFilterExpanded && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-card">
+        <div className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-card">
           <div>
             <label className="text-sm font-medium text-foreground mb-2 block">
               Category
@@ -106,42 +94,6 @@ export default function SearchAndFilter({
                 {categories.map((category) => (
                   <SelectItem key={category} value={category} data-testid={`option-category-${category}`}>
                     {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">
-              Project Size
-            </label>
-            <Select value={selectedSize} onValueChange={onSizeChange}>
-              <SelectTrigger data-testid="select-size">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {projectSizes.map((size) => (
-                  <SelectItem key={size} value={size} data-testid={`option-size-${size}`}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">
-              Delivery Model
-            </label>
-            <Select value={selectedDeliveryModel} onValueChange={onDeliveryModelChange}>
-              <SelectTrigger data-testid="select-delivery">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {deliveryModels.map((model) => (
-                  <SelectItem key={model} value={model} data-testid={`option-delivery-${model}`}>
-                    {model}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -161,32 +113,6 @@ export default function SearchAndFilter({
                 size="sm"
                 className="h-auto p-0 hover:bg-transparent"
                 onClick={() => onCategoryChange("All")}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-          {selectedSize !== "All" && (
-            <Badge variant="secondary" className="flex items-center space-x-1">
-              <span>Size: {selectedSize}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 hover:bg-transparent"
-                onClick={() => onSizeChange("All")}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-          {selectedDeliveryModel !== "All" && (
-            <Badge variant="secondary" className="flex items-center space-x-1">
-              <span>Delivery: {selectedDeliveryModel}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 hover:bg-transparent"
-                onClick={() => onDeliveryModelChange("All")}
               >
                 <X className="h-3 w-3" />
               </Button>

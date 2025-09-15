@@ -17,48 +17,40 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
-// IT Services data types based on the provided JSON
+// IT Services data types based on the provided services data
 export interface ITService {
-  id: string;
-  ServiceCategory: string;
-  SubService: string;
-  IndustryUseCase: string;
-  ProjectSize: "Small" | "Medium" | "Large";
-  DeliveryModel: "Offshore" | "Onshore" | "Hybrid";
-  Pricing: {
-    PricingType: string;
-    TotalEstimatedCostUSD: string;
-    MilestoneBased: any[];
+  id: number;
+  name: string;
+  category: string;
+  baseCostUSD: number;
+  description: string;
+  detailedDescription: string;
+  keyFeatures: string[];
+  scaleDetails: {
+    Small: string;
+    Medium: string;
+    Large: string;
   };
-  ToolingLicensingInfra: {
-    CloudGPU_monthly_USD?: string;
-    CloudHosting_monthly_USD?: string;
-    SaaS_license_annual_USD?: string;
-    Monitoring_tool_annual_USD?: string;
-    Security_tools_annual_USD?: string;
-    ERP_license_annual_USD?: string;
+  scaleMultipliers: {
+    Small: number;
+    Medium: number;
+    Large: number;
   };
-  ComplianceCostsUSD: {
-    GDPR_USD?: string;
+  addOns: Array<{
+    name: string;
+    costUSD: number;
+    description: string;
+  }>;
+  monthlyMaintenance: {
+    Small: number;
+    Medium: number;
+    Large: number;
   };
-  TechnologyStack: string[];
-  RegionsServed: string[];
-  ScopeInclusions: string[];
-  ScopeExclusions: string[];
-  ServiceDescription: string;
-  KeyFeatures: string[];
-  AddOns: any[];
-  Notes: string;
-  TimelineWeeks: string;
-  EngagementModel: string;
-  PaymentTerms: string;
-  RiskFactors: string[];
 }
 
 export interface ServiceConfiguration {
-  serviceId: string;
+  serviceId: number;
   projectSize: "Small" | "Medium" | "Large";
-  deliveryModel: "Offshore" | "Onshore" | "Hybrid";
   selectedAddOns: string[];
   customizations: Record<string, any>;
 }

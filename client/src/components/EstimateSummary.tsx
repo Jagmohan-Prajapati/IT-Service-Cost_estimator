@@ -22,13 +22,13 @@ const formatCurrency = (amount: number, currency: Currency, rate: number): strin
   })}`;
 };
 
-const parseCostRange = (costString: string): number => {
-  // Extract the minimum value from ranges like "$10,000 - $50,000"
-  const match = costString.match(/\$([0-9,]+)/);
-  if (match) {
-    return parseInt(match[1].replace(/,/g, ''));
-  }
-  return 0;
+const calculateServiceCost = (item: EstimateItem): number => {
+  const baseCost = item.service.baseCostUSD * item.service.scaleMultipliers[item.configuration.projectSize];
+  const addOnsCost = item.service.addOns
+    .filter(addon => item.configuration.selectedAddOns.includes(addon.name))
+    .reduce((sum, addon) => sum + addon.costUSD, 0);
+  
+  return baseCost + addOnsCost;
 };
 
 export default function EstimateSummary({
@@ -38,9 +38,12 @@ export default function EstimateSummary({
   onRemoveItem,
   onExportEstimate
 }: EstimateSummaryProps) {
-  const totalCost = estimateItems.reduce((sum, item) => {
-    return sum + parseCostRange(item.service.Pricing.TotalEstimatedCostUSD);
+  const subtotal = estimateItems.reduce((sum, item) => {
+    return sum + calculateServiceCost(item);
   }, 0);
+
+  const taxAmount = subtotal * 0.18; // 18% tax
+  const totalCost = subtotal + taxAmount;
 
   const handleRemoveItem = (itemId: string) => {
     console.log('Remove item triggered:', itemId);
@@ -82,8 +85,8 @@ export default function EstimateSummary({
                 <div key={item.id} className="border rounded-lg p-3 space-y-2" data-testid={`estimate-item-${item.id}`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium">{item.service.SubService}</h4>
-                      <p className="text-xs text-muted-foreground">{item.service.ServiceCategory}</p>
+                      <h4 className="text-sm font-medium">{item.service.name}</h4>
+                      <p className="text-xs text-muted-foreground">{item.service.category}</p>
                     </div>
                     <Button
                       variant="ghost"
@@ -99,10 +102,14 @@ export default function EstimateSummary({
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex space-x-2">
                       <Badge variant="outline">{item.configuration.projectSize}</Badge>
-                      <Badge variant="outline">{item.configuration.deliveryModel}</Badge>
+                      {item.configuration.selectedAddOns.length > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{item.configuration.selectedAddOns.length} add-ons
+                        </Badge>
+                      )}
                     </div>
                     <span className="font-medium" data-testid={`cost-${item.id}`}>
-                      {formatCurrency(parseCostRange(item.service.Pricing.TotalEstimatedCostUSD), selectedCurrency, currencyRate)}
+                      {formatCurrency(calculateServiceCost(item), selectedCurrency, currencyRate)}
                     </span>
                   </div>
                 </div>
@@ -116,14 +123,14 @@ export default function EstimateSummary({
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal:</span>
                 <span data-testid="text-subtotal">
-                  {formatCurrency(totalCost, selectedCurrency, currencyRate)}
+                  {formatCurrency(subtotal, selectedCurrency, currencyRate)}
                 </span>
               </div>
               
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Estimated tax (varies by region):</span>
+                <span className="text-muted-foreground">Tax (18%):</span>
                 <span data-testid="text-tax">
-                  {formatCurrency(totalCost * 0.1, selectedCurrency, currencyRate)}
+                  {formatCurrency(taxAmount, selectedCurrency, currencyRate)}
                 </span>
               </div>
               
@@ -132,8 +139,12 @@ export default function EstimateSummary({
               <div className="flex items-center justify-between text-lg font-semibold">
                 <span>Total Estimate:</span>
                 <span className="text-primary" data-testid="text-total">
-                  {formatCurrency(totalCost * 1.1, selectedCurrency, currencyRate)}
+                  {formatCurrency(totalCost, selectedCurrency, currencyRate)}
                 </span>
+              </div>
+              
+              <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                <strong>Note:</strong> The total price can be negotiated up to 15%
               </div>
             </div>
 

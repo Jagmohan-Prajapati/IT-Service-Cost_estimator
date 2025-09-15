@@ -1,66 +1,47 @@
+import React from 'react';
 import ServiceConfigModal from '../ServiceConfigModal';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import type { ITService } from '@shared/schema';
 
 export default function ServiceConfigModalExample() {
   const [isOpen, setIsOpen] = useState(false);
 
   const mockService: ITService = {
-    id: "ITSC_00001",
-    ServiceCategory: "ERP",
-    SubService: "Core ERP Implementation",
-    IndustryUseCase: "Retail",
-    ProjectSize: "Medium",
-    DeliveryModel: "Offshore",
-    Pricing: {
-      PricingType: "Fixed Quotation",
-      TotalEstimatedCostUSD: "$25,000 - $75,000",
-      MilestoneBased: []
-    },
-    ToolingLicensingInfra: {
-      CloudGPU_monthly_USD: "$500 - $1500",
-      CloudHosting_monthly_USD: "$100 - $3000",
-    },
-    ComplianceCostsUSD: {
-      GDPR_USD: "$5000 - $15000"
-    },
-    TechnologyStack: ["Odoo", "PostgreSQL", "Python", "REST APIs", "Docker"],
-    RegionsServed: ["India", "US", "UK", "UAE", "Australia"],
-    ScopeInclusions: [
-      "Requirement Gathering & Analysis",
-      "System Design & Architecture", 
-      "Core Development & Implementation",
-      "Integration with existing systems",
-      "Comprehensive Testing (Unit, Integration, UAT)",
-      "Deployment & Go-live Support",
-      "Initial Training & Documentation"
+    id: 1,
+    name: "Web Development",
+    category: "Development",
+    baseCostUSD: 5000,
+    description: "Complete website development from concept to launch",
+    detailedDescription: "Our web development service provides end-to-end website creation tailored to your business needs.",
+    keyFeatures: [
+      "Responsive design for all devices",
+      "Content Management System (CMS)",
+      "SEO-optimized structure and content",
+      "Cross-browser compatibility"
     ],
-    ScopeExclusions: [
-      "Hardware procurement and setup",
-      "Third-party legacy system licensing costs",
-      "Data cleanup beyond agreed scope",
-      "Ongoing maintenance after warranty period"
+    scaleDetails: {
+      Small: "Basic 5-10 page website with standard features",
+      Medium: "Enhanced 15-25 page website with advanced functionality",
+      Large: "Enterprise-level website with complex integrations"
+    },
+    scaleMultipliers: {
+      Small: 1.0,
+      Medium: 1.5,
+      Large: 2.5
+    },
+    addOns: [
+      {
+        name: "SEO Optimization",
+        costUSD: 500,
+        description: "Advanced search engine optimization"
+      }
     ],
-    ServiceDescription: "Comprehensive ERP implementation tailored for retail businesses. Includes complete system setup, data migration, user training, and post-deployment support. Our solution integrates inventory management, sales processing, customer relationship management, and financial reporting into a unified platform.",
-    KeyFeatures: [
-      "Real-time Inventory Management",
-      "Integrated POS System", 
-      "Customer Relationship Management",
-      "Financial Reporting & Analytics",
-      "Multi-location Support",
-      "Mobile Application Access"
-    ],
-    AddOns: [],
-    Notes: "Delivery model 'Offshore' includes dedicated project manager and 24/7 support during implementation phase.",
-    TimelineWeeks: "12 - 24",
-    EngagementModel: "Fixed-price project with milestone-based delivery",
-    PaymentTerms: "30% upfront, 40% at 50% completion, 30% on final delivery",
-    RiskFactors: [
-      "Data migration complexity from legacy systems",
-      "User adoption and change management requirements",
-      "Integration challenges with existing third-party tools"
-    ]
+    monthlyMaintenance: {
+      Small: 100,
+      Medium: 200,
+      Large: 400
+    }
   };
 
   return (
@@ -74,9 +55,11 @@ export default function ServiceConfigModalExample() {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         onAddToEstimate={(service, config) => {
-          console.log('Added to estimate:', service.SubService, config);
+          console.log('Added to estimate:', service.name, config);
           setIsOpen(false);
         }}
+        selectedCurrency="USD"
+        currencyRate={1}
       />
     </div>
   );

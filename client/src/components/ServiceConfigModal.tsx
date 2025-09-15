@@ -14,23 +14,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { CheckSquare, Square, Clock, DollarSign, Users, Globe } from "lucide-react";
-import type { ITService, ServiceConfiguration } from "@shared/schema";
+import type { ITService, ServiceConfiguration, Currency } from "@shared/schema";
 
 interface ServiceConfigModalProps {
   service: ITService | null;
   isOpen: boolean;
   onClose: () => void;
   onAddToEstimate: (service: ITService, config: ServiceConfiguration) => void;
+  selectedCurrency: Currency;
+  currencyRate: number;
 }
 
 export default function ServiceConfigModal({
   service,
   isOpen,
   onClose,
-  onAddToEstimate
+  onAddToEstimate,
+  selectedCurrency,
+  currencyRate
 }: ServiceConfigModalProps) {
   const [selectedSize, setSelectedSize] = useState<"Small" | "Medium" | "Large">("Small");
-  const [selectedDeliveryModel, setSelectedDeliveryModel] = useState<"Offshore" | "Onshore" | "Hybrid">("Offshore");
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
 
   if (!service) return null;
@@ -39,7 +42,6 @@ export default function ServiceConfigModal({
     const configuration: ServiceConfiguration = {
       serviceId: service.id,
       projectSize: selectedSize,
-      deliveryModel: selectedDeliveryModel,
       selectedAddOns,
       customizations: {}
     };
@@ -57,39 +59,32 @@ export default function ServiceConfigModal({
     );
   };
 
-  const getCostMultiplier = (deliveryModel: string): number => {
-    switch (deliveryModel) {
-      case "Offshore": return 0.65;
-      case "Onshore": return 1.3;
-      case "Hybrid": return 0.95;
-      default: return 1;
-    }
+  const formatCurrency = (amount: number): string => {
+    const convertedAmount = amount * currencyRate;
+    const symbols = { USD: '$', EUR: '€', GBP: '£', INR: '₹' };
+    return `${symbols[selectedCurrency]}${convertedAmount.toLocaleString(undefined, { 
+      minimumFractionDigits: 0, 
+      maximumFractionDigits: 0 
+    })}`;
   };
 
-  const getSizeMultiplier = (size: string): number => {
-    switch (size) {
-      case "Small": return 1;
-      case "Medium": return 1.8;
-      case "Large": return 3.2;
-      default: return 1;
-    }
+  const calculateEstimatedCost = (): string => {
+    const baseCost = service.baseCostUSD * service.scaleMultipliers[selectedSize];
+    const addOnsCost = service.addOns
+      .filter(addon => selectedAddOns.includes(addon.name))
+      .reduce((sum, addon) => sum + addon.costUSD, 0);
+    
+    const totalCost = baseCost + addOnsCost;
+    return formatCurrency(totalCost);
   };
-
-  // Mock add-ons since the data doesn't have them populated
-  const mockAddOns = [
-    { name: "Extended Support (12 months)", cost: 5000 },
-    { name: "Data Migration Service", cost: 8000 },
-    { name: "Custom Training Program", cost: 3000 },
-    { name: "Performance Monitoring", cost: 2000 }
-  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="modal-service-config">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
-            <span data-testid="text-modal-title">{service.SubService}</span>
-            <Badge variant="secondary">{service.ServiceCategory}</Badge>
+            <span data-testid="text-modal-title">{service.name}</span>
+            <Badge variant="secondary">{service.category}</Badge>
           </DialogTitle>
           <DialogDescription>
             Configure your service requirements and get a detailed cost estimate
@@ -114,37 +109,17 @@ export default function ServiceConfigModal({
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  {service.ServiceDescription !== "Detailed description coming soon." 
-                    ? service.ServiceDescription 
-                    : `Comprehensive ${service.ServiceCategory} solution designed for ${service.IndustryUseCase} industry. This ${service.ProjectSize.toLowerCase()}-scale implementation includes all essential components for successful deployment.`
-                  }
+                  {service.detailedDescription}
                 </p>
                 
                 <div>
                   <h4 className="font-medium mb-2">Key Features:</h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {service.KeyFeatures.length > 0 && service.KeyFeatures[0] !== "Feature details coming soon." 
-                      ? service.KeyFeatures.map((feature, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <CheckSquare className="h-4 w-4 text-green-600" />
-                          <span className="text-sm">{feature}</span>
-                        </div>
-                      ))
-                      : ["Core Implementation", "System Integration", "User Training", "Documentation"].map((feature, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <CheckSquare className="h-4 w-4 text-green-600" />
-                          <span className="text-sm">{feature}</span>
-                        </div>
-                      ))
-                    }
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium mb-2">Technology Stack:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {service.TechnologyStack.map((tech, index) => (
-                      <Badge key={index} variant="outline">{tech}</Badge>
+                    {service.keyFeatures.map((feature, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <CheckSquare className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -166,11 +141,9 @@ export default function ServiceConfigModal({
                           <RadioGroupItem value={size} id={size} data-testid={`radio-size-${size}`} />
                           <Label htmlFor={size} className="flex-1">
                             <div>
-                              <span className="font-medium">{size}</span>
+                              <span className="font-medium">{size} ({service.scaleMultipliers[size]}x)</span>
                               <p className="text-xs text-muted-foreground">
-                                {size === "Small" && "Up to 50 users, basic features"}
-                                {size === "Medium" && "50-200 users, advanced features"}
-                                {size === "Large" && "200+ users, enterprise features"}
+                                {service.scaleDetails[size]}
                               </p>
                             </div>
                           </Label>
@@ -181,32 +154,6 @@ export default function ServiceConfigModal({
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Delivery Model</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <RadioGroup value={selectedDeliveryModel} onValueChange={(value: any) => setSelectedDeliveryModel(value)}>
-                    <div className="space-y-3">
-                      {(["Offshore", "Onshore", "Hybrid"] as const).map((model) => (
-                        <div key={model} className="flex items-center space-x-2">
-                          <RadioGroupItem value={model} id={model} data-testid={`radio-delivery-${model}`} />
-                          <Label htmlFor={model} className="flex-1">
-                            <div>
-                              <span className="font-medium">{model}</span>
-                              <p className="text-xs text-muted-foreground">
-                                {model === "Offshore" && "Cost-effective, remote delivery"}
-                                {model === "Onshore" && "Local team, premium pricing"}
-                                {model === "Hybrid" && "Mixed approach, balanced cost"}
-                              </p>
-                            </div>
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
-                </CardContent>
-              </Card>
             </div>
 
             <Card>
@@ -215,7 +162,7 @@ export default function ServiceConfigModal({
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {mockAddOns.map((addon, index) => (
+                  {service.addOns.map((addon, index) => (
                     <div 
                       key={index} 
                       className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover-elevate"
@@ -228,11 +175,12 @@ export default function ServiceConfigModal({
                         ) : (
                           <Square className="h-5 w-5 text-muted-foreground" />
                         )}
-                        <div>
+                        <div className="flex-1">
                           <span className="text-sm font-medium">{addon.name}</span>
+                          <p className="text-xs text-muted-foreground mt-1">{addon.description}</p>
                         </div>
                       </div>
-                      <span className="text-sm font-medium">${addon.cost.toLocaleString()}</span>
+                      <span className="text-sm font-medium">{formatCurrency(addon.costUSD)}</span>
                     </div>
                   ))}
                 </div>
@@ -251,25 +199,20 @@ export default function ServiceConfigModal({
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span>Base Cost ({service.ProjectSize}):</span>
-                    <span>{service.Pricing.TotalEstimatedCostUSD}</span>
+                    <span>Base Cost:</span>
+                    <span>{formatCurrency(service.baseCostUSD)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Size Multiplier ({selectedSize}):</span>
-                    <span>{getSizeMultiplier(selectedSize)}x</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Delivery Model ({selectedDeliveryModel}):</span>
-                    <span>{getCostMultiplier(selectedDeliveryModel)}x</span>
+                    <span>{service.scaleMultipliers[selectedSize]}x</span>
                   </div>
                   {selectedAddOns.length > 0 && (
                     <div className="flex justify-between">
                       <span>Add-ons:</span>
                       <span>
-                        ${mockAddOns
+                        {formatCurrency(service.addOns
                           .filter(addon => selectedAddOns.includes(addon.name))
-                          .reduce((sum, addon) => sum + addon.cost, 0)
-                          .toLocaleString()}
+                          .reduce((sum, addon) => sum + addon.costUSD, 0))}
                       </span>
                     </div>
                   )}
@@ -278,7 +221,7 @@ export default function ServiceConfigModal({
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Estimated Total:</span>
                   <span className="text-primary" data-testid="text-estimated-total">
-                    Contact for detailed quote
+                    {calculateEstimatedCost()}
                   </span>
                 </div>
               </CardContent>
@@ -296,16 +239,12 @@ export default function ServiceConfigModal({
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <span className="font-medium">Timeline: </span>
-                    <span>{service.TimelineWeeks} weeks</span>
+                    <span className="font-medium">Monthly Maintenance: </span>
+                    <span>{formatCurrency(service.monthlyMaintenance[selectedSize])}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Engagement Model: </span>
-                    <span>{service.EngagementModel}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Payment Terms: </span>
-                    <span>{service.PaymentTerms}</span>
+                    <span className="font-medium">Scale Details: </span>
+                    <span>{service.scaleDetails[selectedSize]}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -319,17 +258,9 @@ export default function ServiceConfigModal({
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <h5 className="font-medium text-green-700">Included:</h5>
+                    <h5 className="font-medium text-green-700">Key Features:</h5>
                     <ul className="text-sm text-muted-foreground ml-2">
-                      {service.ScopeInclusions.slice(0, 3).map((item, index) => (
-                        <li key={index}>• {item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-red-700">Excluded:</h5>
-                    <ul className="text-sm text-muted-foreground ml-2">
-                      {service.ScopeExclusions.slice(0, 2).map((item, index) => (
+                      {service.keyFeatures.slice(0, 4).map((item, index) => (
                         <li key={index}>• {item}</li>
                       ))}
                     </ul>

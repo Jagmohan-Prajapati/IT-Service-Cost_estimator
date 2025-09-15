@@ -3,46 +3,38 @@ import ServiceCard from "./ServiceCard";
 import SearchAndFilter from "./SearchAndFilter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
-import type { ITService } from "@shared/schema";
+import type { ITService, Currency } from "@shared/schema";
 
 interface ServiceCatalogProps {
   services: ITService[];
   isLoading?: boolean;
   onServiceConfigure: (service: ITService) => void;
+  selectedCurrency: Currency;
+  currencyRate: number;
 }
 
-export default function ServiceCatalog({ services, isLoading = false, onServiceConfigure }: ServiceCatalogProps) {
+export default function ServiceCatalog({ services, isLoading = false, onServiceConfigure, selectedCurrency, currencyRate }: ServiceCatalogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedSize, setSelectedSize] = useState("All");
-  const [selectedDeliveryModel, setSelectedDeliveryModel] = useState("All");
 
   const filteredServices = useMemo(() => {
     return services.filter(service => {
       const matchesSearch = searchQuery === "" || 
-        service.SubService.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.ServiceCategory.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.ServiceDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.TechnologyStack.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()));
+        service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.keyFeatures.some(feature => feature.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesCategory = selectedCategory === "All" || 
-        service.ServiceCategory === selectedCategory;
+        service.category === selectedCategory;
 
-      const matchesSize = selectedSize === "All" || 
-        service.ProjectSize === selectedSize;
-
-      const matchesDeliveryModel = selectedDeliveryModel === "All" || 
-        service.DeliveryModel === selectedDeliveryModel;
-
-      return matchesSearch && matchesCategory && matchesSize && matchesDeliveryModel;
+      return matchesSearch && matchesCategory;
     });
-  }, [services, searchQuery, selectedCategory, selectedSize, selectedDeliveryModel]);
+  }, [services, searchQuery, selectedCategory]);
 
   const handleClearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("All");
-    setSelectedSize("All");
-    setSelectedDeliveryModel("All");
   };
 
   if (isLoading) {
@@ -63,10 +55,6 @@ export default function ServiceCatalog({ services, isLoading = false, onServiceC
         onSearchChange={setSearchQuery}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
-        selectedSize={selectedSize}
-        onSizeChange={setSelectedSize}
-        selectedDeliveryModel={selectedDeliveryModel}
-        onDeliveryModelChange={setSelectedDeliveryModel}
         onClearFilters={handleClearFilters}
       />
 
@@ -90,6 +78,8 @@ export default function ServiceCatalog({ services, isLoading = false, onServiceC
                 key={service.id}
                 service={service}
                 onConfigure={onServiceConfigure}
+                selectedCurrency={selectedCurrency}
+                currencyRate={currencyRate}
               />
             ))}
           </div>
