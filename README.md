@@ -57,7 +57,7 @@ git clone https://github.com/Jagmohan-Prajapati/IT-Service-Cost_estimator.git
 cd IT-Service-Cost_estimator  
 npm install  
 
-<! --Run development server -->
+<!-- Run development server -->
 npm run dev  
 Visit http://localhost:5173  
 
