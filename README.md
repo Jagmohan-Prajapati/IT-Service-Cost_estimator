@@ -57,7 +57,7 @@ git clone https://github.com/Jagmohan-Prajapati/IT-Service-Cost_estimator.git
 cd IT-Service-Cost_estimator  
 npm install  
 
-<!-- Run development server -->
+Run development server
 npm run dev  
 Visit http://localhost:5173  
 
@@ -68,10 +68,12 @@ Scope: E-commerce platform
 Features: Auth, Product Catalog, Cart, Payments  
 Timeline: 3 months  
 
---- Cost Estimate ---
-Development:   ₹1,20,000
-UI/UX Design:  ₹25,000
-Testing & QA:  ₹15,000
-Deployment:    ₹10,000
----------------------
-Total:         ₹1,70,000
+### Cost Estimate
+
+| Category        | Cost        |
+|-----------------|------------|
+| Development     | ₹1,20,000  |
+| UI/UX Design    | ₹25,000    |
+| Testing & QA    | ₹15,000    |
+| Deployment      | ₹10,000    |
+| **Total**       | **₹1,70,000** |
