@@ -1,32 +1,77 @@
-# IT Services Cost Estimation Platform
+# IT Service Cost Estimator
 
-## Overview
-A professional web application for businesses to browse, configure, and estimate costs for IT services. Features visual search capabilities, interactive configuration tools, multi-currency support, and a clean, modern interface built with React and TypeScript.
+Full-stack IT service cost estimator built as a TypeScript monorepo with shared modules across client and server. Helps businesses scope and price web application development and digital marketing projects with structured cost breakdowns.
+
+**Engineering concept:** Full-stack TypeScript monorepo, shared module architecture, service scoping and pricing system.
 
 ## Architecture
-- **Frontend**: React with TypeScript, Tailwind CSS, shadcn/ui components
-- **Backend**: Express.js with TypeScript (prepared for future development)
-- **Data**: Currently uses data based on provided JSON structure
-- **Styling**: Professional design system with Inter font, consistent spacing, and proper dark/light mode support
 
-## Key Features Implemented
-- Service catalog with visual search and filtering
-- Interactive service configuration modals with tabs for overview, configuration, pricing, and details
-- Real-time cost estimation with currency conversion
-- Professional header with currency selector and theme toggle
-- Responsive design that works on desktop, tablet, and mobile
-- Clean component architecture with proper TypeScript types
+```mermaid
+graph TD
+    User[User Browser] --> Client[Client - React + TypeScript]
+    Client --> API[Server - Node.js + TypeScript]
+    API --> Estimator[Cost Estimation Engine]
+    Estimator --> Shared[Shared Module - Types + Utils]
+    Client --> Shared
+    Estimator --> Response[Structured Cost Breakdown]
+    Response --> Client
+```
 
-## User Workflow
-1. Browse services in the catalog with search and filter options
-2. Click "Configure Service" to open detailed configuration modal
-3. Select project size, delivery model, and add-ons
-4. Add configured services to estimate summary
-5. View real-time cost calculations with currency conversion
-6. Export estimates
+## Tech Stack
 
-## Technical Notes
-- All components follow universal design guidelines with proper hover states, spacing, and accessibility
-- Mock data is clearly marked with //todo: remove mock functionality comments
-- Ready for integration with real data from the provided JSON file
-- Currency conversion and content management prepared for future API integration
+| Layer        | Technology                          |
+| ------------ | ----------------------------------- |
+| Language     | TypeScript                          |
+| Frontend     | React, TypeScript                   |
+| Backend      | Node.js, TypeScript                 |
+| Architecture | Monorepo - client / server / shared |
+| Styling      | Tailwind CSS                        |
+| Build Tool   | Vite                                |
+| License      | MIT                                 |
+
+## Project Structure
+
+├── client/              # React frontend application  
+├── server/              # Node.js backend API  
+├── shared/              # Shared types, utilities, constants  
+├── attached_assets/     # Project assets and documentation  
+├── components.json      # UI component configuration  
+├── design_guidelines.md # Design system reference  
+├── drizzle.config.ts    # Database ORM configuration  
+├── package.json  
+├── tailwind.config.ts  
+├── tsconfig.json  
+├── vite.config.ts  
+└── README.md  
+
+## How the System Works
+
+1. User selects the type of IT service (web app development, digital marketing, etc.)
+2. User inputs project parameters — scope, features, timeline, scale
+3. Cost estimation engine calculates pricing based on defined service rates
+4. Structured cost breakdown is returned: development, design, maintenance, marketing
+5. User can export or share the estimate
+
+## How to Run Locally
+git clone https://github.com/Jagmohan-Prajapati/IT-Service-Cost_estimator.git  
+cd IT-Service-Cost_estimator  
+npm install  
+
+<! --Run development server -->
+npm run dev  
+Visit http://localhost:5173  
+
+## Example Usage
+
+Service Type: Web Application Development  
+Scope: E-commerce platform  
+Features: Auth, Product Catalog, Cart, Payments  
+Timeline: 3 months  
+
+--- Cost Estimate ---
+Development:   ₹1,20,000
+UI/UX Design:  ₹25,000
+Testing & QA:  ₹15,000
+Deployment:    ₹10,000
+---------------------
+Total:         ₹1,70,000
